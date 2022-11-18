@@ -1,0 +1,40 @@
+[build-system]
+requires = ["poetry-core>=1.2.0b2"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry]
+name = "labor_regelungstechnik"
+version = "0.1.0"
+description = "MEGAN: Multi Explanation Graph Attention Network"
+license = "MIT"
+authors = ["Jonas Teufel <jonseb1998@gmail.com>"]
+maintainers = ["Jonas Teufel <jonseb1998@gmail.com>"]
+readme = "README.rst"
+keywords = ["control system engineering"]
+packages = [
+    { include = "labor_regelungstechnik" }
+]
+include = [
+]
+exclude = [
+]
+
+# [tool.poetry.scripts]
+
+
+[tool.poetry.dependencies]
+python = ">=3.8.0,<3.11"
+pycomex = ">=0.3.0"
+click = ">=7.1.2"
+jinja2 = "==3.0.3"
+matplotlib = ">=3.5.3"
+# imageio = "==2.19.0"
+# cairosvg = ">=2.5.2"
+numpy = ">=1.23.2"
+# tensorflow = ">=2.8.0"
+# kgcnn = ">=2.0.1"
+orjson = "==3.8.0"
+# nltk = ">=3.7"
+# rdkit = ">=2022.9.1"
+poetry-bumpversion = ">=0.3.0"
+asammdf = ">=7.1.1"
