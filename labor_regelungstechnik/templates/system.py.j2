@@ -1,0 +1,45 @@
+import control as ct
+import numpy as np
+from numpy import sin, cos, sqrt
+from math import pi
+
+def system(t, states, inputs, params):
+
+    # ~ unpacking the params
+    {% for param, value in params_default_map.items() -%}
+    {{ param }} = params.get('{{ param }}', {{ value }})
+    {% endfor %}
+    # ~ unpacking the state
+    {% for index, var in enumerate(equations_map.keys()) -%}
+    {% set var_input = var.replace("d_", "") -%}
+    {{ var_input }} = states[{{ index }}]
+    {% endfor %}
+    # ~ the main system equations
+    {% for var, expr in equations_map.items() -%}
+    {{ var }} = {{ expr }}
+    {% endfor %}
+    return [{{ ", ".join(equations_map.keys()) }}]
+
+
+def output(t, states, inputs, params):
+
+    # ~ unpacking the params
+    {% for param, value in params_default_map.items() -%}
+    {{ param }} = params.get('{{ param }}', {{ value }})
+    {% endfor %}
+    # ~ unpacking the state
+    {% for index, var in enumerate(equations_map.keys()) -%}
+    {% set var_input = var.replace("d_", "") -%}
+    {{ var_input }} = states[{{ index }}]
+    {% endfor %}
+
+    return []
+
+
+io_system = ct.NonlinearIOSystem(
+    system, output,
+    inputs=(''),
+    outputs=(''),
+    states=(''),
+    name='system',
+)

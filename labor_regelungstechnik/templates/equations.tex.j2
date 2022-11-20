@@ -1,0 +1,7 @@
+\begin{math}
+\begin{aligned}
+{% for equation in content -%}
+    {{ equation.replace("=", "&=") }} \\
+{% endfor -%}
+\end{aligned}
+\end{math}

@@ -1,0 +1,36 @@
+% This template is a bit strange, but apparently it works such that the resulting PDF page dynamically
+% fits to the size of the content.
+% https://tex.stackexchange.com/questions/299005/automatic-page-size-to-fit-arbitrary-content
+\documentclass{article}
+\usepackage{xcolor}
+\usepackage{soul}
+\usepackage{amsmath}
+\usepackage{booktabs}
+\usepackage{relsize}
+\usepackage{tabulary}% This is for tables
+\usepackage{multirow}
+\usepackage{longtable,array,ragged2e}
+\newcommand{\ctext}[3][RGB]{ %
+  \begingroup
+  \definecolor{hlcolor}{RGB}{ #2}\sethlcolor{hlcolor}%
+  \hl{ #3}%
+  \endgroup
+}
+\newcommand{\reducedstrut}{\vrule width 0pt height .9\ht\strutbox depth .9\dp\strutbox\relax}
+\newcolumntype{R}[1]{>{\raggedleft\arraybackslash}p{ #1 }}
+\newcolumntype{L}[1]{>{\raggedright\arraybackslash}p{ #1 }}
+\begin{document}
+
+\hoffset=-1in
+\voffset=-1in
+\setbox0\hbox{
+
+{% block content %}
+{{ content }}
+{% endblock %}
+
+}
+\pdfpageheight=\dimexpr\ht0+\dp0\relax
+\pdfpagewidth=\wd0
+\shipout\box0
+\stop
