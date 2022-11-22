@@ -1,0 +1,58 @@
+classdef {{ class_name }} < matlab.System
+
+    % == TUNABLE PROPERTIES ==
+    properties
+        {% for property_name, property_value in property_value_map.items() -%}
+        {{ property_name }} = {{ property_value }};
+        {% endfor %}
+    end
+
+    % == DISCRETE STATES ==
+    properties (DiscreteState)
+        {% for state_name in state_expression_map.keys() -%}
+        {{ state_name }}
+        {% endfor %}
+    end
+
+    % == METHODS ==
+    methods (Access = protected)
+
+        % -- Initialization of the states --
+        function resetImpl(obj)
+            {# For now we are restricted to assuming that all the states start at zero #}
+            {% for state_name in state_expression_map.keys() -%}
+            obj.{{ state_name }} = 0.0;
+            {% endfor %}
+        end
+
+        % -- Implementation of actual system behavior --
+        function [{{ state_expression_map.keys()|add_prefix('d_')|join(', ') }},{{ ', '.join(output_names) }}] = stepImpl(obj, {{ ', '.join(state_expression_map.keys()) }}, {{ ', '.join(input_names) }})
+            % This is an artifact of the code generation process. The sympy code generation couldn't
+            % possibly know that the additional properties are only available as object properties, which is
+            % we map them to local variables here, which will then be usable within the automatically
+            % generated state equation expressions.
+            {% for property_name in property_value_map.keys() -%}
+            {{ property_name }} = obj.{{ property_name }};
+            {% endfor %}
+
+            % Here we update the internal state from exactly the inputs
+            {% for state_name in state_expression_map.keys() -%}
+            obj.{{ state_name }} = {{ state_name }};
+            {% endfor %}
+
+            % First of all we calculate the output using the current states and the given input
+            {% for output_name in output_names -%}
+            {{ output_name }} = %INSERT HERE% ;
+            {% endfor %}
+
+            % Then we apply the state equations so that we can output the derived system state, which will
+            % then have to be fed into an integrator block
+            {% for state_name, expression in state_expression_map.items() -%}
+            d_{{ state_name }} = {{ expression }};
+            {% endfor %}
+
+        end
+
+    end
+
+end

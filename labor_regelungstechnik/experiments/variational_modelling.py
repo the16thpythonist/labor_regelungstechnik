@@ -50,6 +50,8 @@ with Skippable(), (e := Experiment(base_path=BASE_PATH, namespace=NAMESPACE, glo
 
     k_vx = sp.Symbol('k_vx')
     k_vl = sp.Symbol('k_vl')
+    k_phi = sp.Symbol('k_phi')
+
     params_default_map = {
         'm_x': 30,
         'm_y': 3,
@@ -61,13 +63,16 @@ with Skippable(), (e := Experiment(base_path=BASE_PATH, namespace=NAMESPACE, glo
         'k_l': 200,
         'l_0': 0.1,
         'k_vx': 4,
-        'k_vl': 2
+        'k_vl': 2,
+        'k_phi': 0.4
     }
 
     t = sp.Symbol('t')
     x, l, phi = spd.dynamicsymbols(r'x l \varphi')
     X, L, Phi = spd.dynamicsymbols(r'X L \phi')
     #l = sp.Symbol('l')
+
+    l_sum = (l_0 + l)
 
     general_coordinates_map = {
         str(x): x,
@@ -81,11 +86,9 @@ with Skippable(), (e := Experiment(base_path=BASE_PATH, namespace=NAMESPACE, glo
     }
     coordinate_rhs_map = {
         str(x): k_x * (v_x - x.diff(t)),
-        str(l): k_l * (v_l - l.diff(t)),
-        str(phi): - m_y * g * sp.sin(phi) * l - c_varphi * phi.diff(t)
+        str(l): k_l * (v_l - l_sum.diff(t)),
+        str(phi): - m_y * g * sp.sin(phi) * l_sum - c_varphi * phi.diff(t)
     }
-
-    l_sum = (l_0 + l)
 
     energy = (sp.Rational(1, 2) * (m_x + m_y) * x.diff(t)**2) \
     + (sp.Rational(1, 2) * m_y * (l_sum.diff(t) * sp.sin(phi) - x.diff(t) + l_sum * phi.diff(t) * sp.cos(phi))**2) \
@@ -239,3 +242,20 @@ with Skippable(), (e := Experiment(base_path=BASE_PATH, namespace=NAMESPACE, glo
     code_path = os.path.join(e.path, 'system.py')
     with open(code_path, mode='w') as file:
         file.write(code_string)
+
+    # == MATLAB CODE GENERATION
+    matlab_expression_map = {sp.octave_code(symbol).replace('d_', ''): sp.octave_code(expression)
+                             for symbol, expression in solved_dict.items()}
+
+    matlab_system_template = TEMPLATE_ENV.get_template('system.m.j2')
+    matlab_code = matlab_system_template.render({
+        'class_name': 'System',
+        'property_value_map': params_default_map,
+        'state_expression_map': matlab_expression_map,
+        'input_names': ['v_x', 'v_l'],
+        'output_names': ['x_out', 'l_out', 'phi_out']
+    })
+    matlab_code_path = os.path.join(e.path, 'system.m')
+    with open(matlab_code_path, mode='w') as file:
+        file.write(matlab_code)
+

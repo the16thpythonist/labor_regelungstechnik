@@ -2,6 +2,7 @@ import os
 import pathlib
 import subprocess
 import tempfile
+import typing as t
 
 import shutil
 import jinja2 as j2
@@ -10,6 +11,9 @@ PATH = pathlib.Path(__file__).parent.absolute()
 MEASUREMENTS_PATH = os.path.join(PATH, 'measurements')
 TEMPLATES_PATH = os.path.join(PATH, 'templates')
 
+
+
+
 TEMPLATE_ENV = j2.Environment(
     loader=j2.FileSystemLoader(TEMPLATES_PATH),
     autoescape=j2.select_autoescape(),
@@ -17,8 +21,20 @@ TEMPLATE_ENV = j2.Environment(
 TEMPLATE_ENV.globals.update(**{
     'zip': zip,
     'int': int,
-    'enumerate': enumerate
+    'enumerate': enumerate,
 })
+
+def add_prefix(inp, prefix: str):
+
+    if isinstance(inp, str):
+        return prefix + inp
+    else:
+        return [prefix + string for string in inp]
+
+    return func
+
+
+TEMPLATE_ENV.filters['add_prefix'] = add_prefix
 
 
 def latex_math(content: str,

@@ -77,8 +77,8 @@ with Skippable(), (e := Experiment(base_path=BASE_PATH, namespace=NAMESPACE, glo
                     value = measurement[key][3]
                     initial_conditions.append(value)
 
-            initial_conditions[2] = max(0.01, initial_conditions[2])
-            initial_conditions[4] = 0
+            initial_conditions[2] = initial_conditions[2]
+            initial_conditions[4] = np.radians(initial_conditions[4])
 
             # We unpack the parameter array into a dict such that the system can make sense of it
             if parameters is None:
@@ -130,10 +130,14 @@ with Skippable(), (e := Experiment(base_path=BASE_PATH, namespace=NAMESPACE, glo
             fig.suptitle(f'measurement {index}\n'
                          f'error: {error:.2f}')
 
-            for row_index, name, row in zip([0, 1, 2], ['x', 'l', 'phi'], rows):
+            for row_index, name, limits, row in zip([0, 1, 2],
+                                                    ['x', 'l', 'phi'],
+                                                    [(-0.1, 3), (-0.1, 1.5), (-15, 15)],
+                                                    rows):
                 ax = row[0]
                 ax.set_title(name)
 
+                ax.set_ylim(limits)
                 ax.plot(
                     records['timestamps'],
                     records['measured'][row_index],
