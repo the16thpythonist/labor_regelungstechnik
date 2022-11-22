@@ -80,11 +80,11 @@ classdef System < matlab.System
             v_x = k_vx * v_x;
             v_l = k_vl * v_l;
 
-            if (x < 0 && X < 0) || (x > 2.5 && X > 0)
+            if (x < -0.1 && X < 0) || (x > 2.5 && X > 0)
                 v_x = 0;
             end
 
-            if (l < 0 && L < 0) || (l > 1.3 && L > 0)
+            if (l < -0.1 && L < 0) || (l > 1.3 && L > 0)
                 v_l = 0;
             end
 
