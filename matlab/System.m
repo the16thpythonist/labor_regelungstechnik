@@ -4,6 +4,7 @@ classdef System < matlab.System
     properties
         m_x = 40;
         m_y = 3;
+        m_y0 = 3;
         y_max = 1.2;
         g = 9.81;
         c_varphi = 0.12;
@@ -14,6 +15,7 @@ classdef System < matlab.System
         k_vx = 3.6;
         k_vl = -1.65;
         k_phi = 0.4;
+        v_max = 0.2;
         
     end
 
@@ -44,7 +46,7 @@ classdef System < matlab.System
         end
 
         % -- Implementation of actual system behavior --
-        function [d_L, d_X, d_l, d_phi, d_varphi, d_x,x_out, l_out, phi_out] = stepImpl(obj, L, X, l, phi, varphi, x, v_x, v_l)
+        function [d_L, d_X, d_l, d_phi, d_varphi, d_x,x_out, l_out, phi_out] = stepImpl(obj, L, X, l, phi, varphi, x, v_x, v_l, m)
             % This is an artifact of the code generation process. The sympy code generation couldn't
             % possibly know that the additional properties are only available as object properties, which is
             % we map them to local variables here, which will then be usable within the automatically
@@ -61,7 +63,9 @@ classdef System < matlab.System
             k_vx = obj.k_vx;
             k_vl = obj.k_vl;
             k_phi = obj.k_phi;
-            
+
+            % We use the external information about the weight of the load
+            m_y = obj.m_y0 + m;
 
             % Here we update the internal state from exactly the inputs
             obj.L = L;
@@ -80,11 +84,18 @@ classdef System < matlab.System
             v_x = k_vx * v_x;
             v_l = k_vl * v_l;
 
-            if (x < -0.1 && X < 0) || (x > 2.5 && X > 0)
+            % With this we enforce the soft constraints of limited speed 
+            % which is important to prevent slipping of the wheels
+            v_x = sign(v_x) * min(abs(v_x), obj.v_max);
+            v_l = sign(v_l) * min(abs(v_l), obj.v_max);
+
+            % With this we enforce the hard constraints that the gantry 
+            % and the crane cannot exceed their maximum positions
+            if (x < -0.01 && X < 0) || (x > 2.5 && X > 0)
                 v_x = 0;
             end
 
-            if (l < -0.1 && L < 0) || (l > 1.3 && L > 0)
+            if (l < -0.01 && L < 0) || (l > 1.3 && L > 0)
                 v_l = 0;
             end
 
